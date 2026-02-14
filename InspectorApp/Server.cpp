@@ -11,20 +11,12 @@
 #define PIPE_NAME L"\\\\.\\pipe\\ProcessExplorerPipe"
 #define BUFSIZE 65536
 
-std::vector<ProcessInfo> getProcessList() {
-    return {
-        {1001, 0, "explorer.exe"},
-        {1002, 1001, "chrome.exe"},
-        {1003, 1001, "visual_studio.exe"}
-    };
-}
-
 Server::Server() {
-    // initiliazation.
+    // init
 }
 
 Server::~Server() {
-    // handle clean up.
+    // clean up
 }
 
 void Server::ClientHandler(HANDLE pipe) {
@@ -50,7 +42,13 @@ void Server::ClientHandler(HANDLE pipe) {
 
             ProcessEnumerator pe;
             std::vector<ProcessInfo> processes;
-            pe.getProcesses(processes);
+            BOOL result = pe.getProcesses(processes);
+
+            if (!result) {
+                std::cout << "Failed to get processes" << std::endl;
+                break;
+            }
+
             auto payload = serializeProcessList(processes);
 
             // Prepare Response
