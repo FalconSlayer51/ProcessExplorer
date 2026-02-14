@@ -14,5 +14,4 @@ namespace Walnut {
 		virtual void OnRender() {}
 		virtual void OnUIRender() {}
 	};
-
 }
