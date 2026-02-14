@@ -6,6 +6,7 @@
 #include "../Common/ProcessInfo.h"
 #include "../Common/Protocol.h"
 #include "../Common/Serializer.h"
+#include "ProcessEnumeration/ProcessEnumerator.h"
 
 #define PIPE_NAME L"\\\\.\\pipe\\ProcessExplorerPipe"
 #define BUFSIZE 65536
@@ -19,7 +20,7 @@ std::vector<ProcessInfo> getProcessList() {
 }
 
 Server::Server() {
-    // handle initiliazation.
+    // initiliazation.
 }
 
 Server::~Server() {
@@ -47,8 +48,10 @@ void Server::ClientHandler(HANDLE pipe) {
         if (header.type == (uint32_t)MessageType::GetProcessList) {
             std::cout << "[Thread " << std::this_thread::get_id() << "] Processing GetProcessList...\n";
 
-            auto list = getProcessList();
-            auto payload = serializeProcessList(list);
+            ProcessEnumerator pe;
+            std::vector<ProcessInfo> processes;
+            pe.getProcesses(processes);
+            auto payload = serializeProcessList(processes);
 
             // Prepare Response
             MessageHeader response;
