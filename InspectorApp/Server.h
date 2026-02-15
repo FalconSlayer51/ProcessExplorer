@@ -1,5 +1,6 @@
 #include <iostream>
 #include <windows.h>
+#include "ThreadPool/ThreadPool.h"
 
 class Server {
 public:
@@ -9,4 +10,5 @@ public:
 	void startServer();
 private:
 	static void ClientHandler(HANDLE pipe);
+	std::unique_ptr<ThreadPool> threadPool;
 };
