@@ -51,7 +51,7 @@ std::vector<ProcessInfo> InspectorIPCClient::DeserializeProcessList(const std::v
 		);
 		ptr += wire.nameLength;
 
-		result.push_back({ wire.pid,wire.parentId,name });
+		result.push_back({ wire.pid,wire.parentId,name, wire.memInfo });
 	}
 
 	return result;

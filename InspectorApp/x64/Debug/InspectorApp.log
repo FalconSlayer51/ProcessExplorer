@@ -1,5 +1,5 @@
-﻿  InspectorApp.cpp
+﻿  Serializer.cpp
+  InspectorApp.cpp
   Server.cpp
-  ThreadPool.cpp
   Generating Code...
   InspectorApp.vcxproj -> E:\projects\wallnut\Walnut\x64\Debug\InspectorApp.exe

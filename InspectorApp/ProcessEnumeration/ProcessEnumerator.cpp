@@ -2,8 +2,26 @@
 #include <windows.h>
 #include <vector>
 #include <tlhelp32.h>
+#include <psapi.h>
 #include "../Common/ProcessInfo.h"
 #include "ProcessEnumerator.h"
+
+BOOL ProcessEnumerator::getProcessMemory(DWORD pid, PROCESS_MEMORY_COUNTERS_EX& memInfo) {
+	HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+	if (hProcess == INVALID_HANDLE_VALUE || hProcess == nullptr) {
+		std::cout << "Unable to open process with pid: " << pid << "error: " << GetLastError();
+		return FALSE;
+	}
+
+	if (!GetProcessMemoryInfo(hProcess, (PROCESS_MEMORY_COUNTERS*)&memInfo, sizeof(memInfo))) {
+		//std::cout << "Unable to get process memory with pid: " << pid << "error: " << GetLastError();
+		CloseHandle(hProcess);
+		return FALSE;
+	}
+
+	CloseHandle(hProcess);
+	return TRUE;
+}
 
 BOOL ProcessEnumerator::getProcesses(std::vector<ProcessInfo>& processes) {
 	HANDLE hSnapshot = CreateToolhelp32Snapshot(
@@ -21,6 +39,7 @@ BOOL ProcessEnumerator::getProcesses(std::vector<ProcessInfo>& processes) {
 
 	if (!Process32First(hSnapshot, &pe32)) {
 		std::cout << "Unable to open snapshot: " << GetLastError() << std::endl;
+		CloseHandle(hSnapshot);
 		return FALSE;
 	}
 
@@ -34,11 +53,21 @@ BOOL ProcessEnumerator::getProcesses(std::vector<ProcessInfo>& processes) {
 		WideCharToMultiByte(CP_UTF8, 0, wname.c_str(), -1, &name[0], size_needed, nullptr, nullptr);
 		if (!name.empty() && name.back() == '\0') name.pop_back();
 
-		pInfo.name = name;
-		pInfo.pid = pe32.th32ProcessID;
-		pInfo.parentId = pe32.th32ParentProcessID;
-
-		processes.push_back(pInfo);
+		// find memInfo
+		PROCESS_MEMORY_COUNTERS_EX memInfo;
+		ZeroMemory(&memInfo, sizeof(PROCESS_MEMORY_COUNTERS_EX));
+		BOOL res = getProcessMemory(pe32.th32ProcessID, memInfo);
+		if (res) {
+			pInfo.name = name;
+			pInfo.pid = pe32.th32ProcessID;
+			pInfo.parentId = pe32.th32ParentProcessID;
+			pInfo.memInfo = memInfo;
+			std::cout << "Memory" << memInfo.PrivateUsage << std::endl;
+			processes.push_back(pInfo);
+		}
+		
 	} while (Process32Next(hSnapshot, &pe32));
+
+	CloseHandle(hSnapshot);
 	return TRUE;
 }

@@ -24,6 +24,7 @@ std::vector<uint8_t> serializeProcessList(const std::vector<ProcessInfo>& list) 
         wire.pid = p.pid;
         wire.parentId = p.parentId;
         wire.nameLength = (uint32_t)p.name.size();
+        wire.memInfo = p.memInfo;
 
         memcpy(ptr, &wire, sizeof(wire));
         ptr += sizeof(wire);

@@ -46,10 +46,7 @@ private:
 			{
 				std::lock_guard<std::mutex> lock(state->mutex);
 				state->processes = std::move(list);
-				std::cout << "Tick" << tick++ 
-					<< "size of vector" 
-					<< state->processes.size() 
-					<< std::endl;
+				std::cout << state->processes[67].memInfo.PrivateUsage << std::endl;
 			}
 
 
